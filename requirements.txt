@@ -1,0 +1,71 @@
+streamlit==1.40.2
+pandas==2.2.3
+numpy==2.1.3
+scikit-learn==1.5.2
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.metrics import accuracy_score
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+# Load libraries
+import pandas as pd
+from pandas.plotting import scatter_matrix
+import matplotlib.pyplot as plt
+
+#Model selection is the process of selecting one final machine learning model 
+#from among a collection of candidate machine learning models for a training dataset.
+from sklearn import model_selection
+
+#import classifiers from sklearn
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import SVC
+
+for classi
+# Step 5 : Evaluate Algorithms and set their hyperparameters
+
+LR = LogisticRegression(solver='lbfgs', multi_class='auto', max_iter=200)
+LDA = LinearDiscriminantAnalysis()
+KNN = KNeighborsClassifier()
+CART = DecisionTreeClassifier()
+NB = GaussianNB()
+SVM = SVC(gamma='auto')
+
+import,read_csv,drop Id, describe,assign X and Y(.values),
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.2, random_state=4),
+
+,linearregression(),.fit,
+accurancy_score(clf.predit(X_test),y_test) for classification datas
+
+class_labels=clf.predict([[1,2,3,4]])[0]
+class_labels need two [][] because .predict expects multiple datasets input
+
+import pandas as pd
+from pandas.plotting import scatter_matrix
+
+names=['sepal-length','sepal-width] assign names first if we dun have them eg url from internet
+dataset=pd.read_csv(url,names=names)
+display(dataset)
+
+.shape(how many rows, columns)
+.describe(analysis report)
+.head(20)(first 20 rows) 
+.head() (only 5 rows)
+.sample(20) instead of head if we want random mix of rows
+.groupby('class').size() (in every class, how many records)(eg iris Sentosa 50)
+
+
+import joblib
+joblib.dump(clf,'model_lda.pkl') - passing the already trained models to others
+
+
