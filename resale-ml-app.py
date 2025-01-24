@@ -7,9 +7,7 @@ import numpy as np
 model = joblib.load('GBR_model.pkl')
 
 # Load the dataset used for training to extract unique values for categorical features
-# Make sure you load the same dataset that was used for training (replace this with your dataset path)
 data = pd.read_csv("ResaleflatpricesbasedonregistrationdatefromJan2017onwards.csv")
-
 
 # Extract unique categories from the dataset
 town_options = data['town'].unique()
@@ -20,7 +18,8 @@ flat_model_options = data['flat_model'].unique()
 # Manually define the column names based on your training setup
 trained_columns = [
     'floor Area (sqm)', 'House Age (Years)', 'Year of Sale', 'Block Number (Numeric)',
-    'Flat Model (Encoded)', 'Town (Encoded)', 'Flat Type 2 Room', 'Flat Type 3 Room', 'Flat Type 4 Room', 'Flat Type 5 Room', 'Flat Type Executive', 'Flat Type Multi Generation','Storey Range Low', 'Storey Range Medium', 'Storey Range High',
+    'Flat Model (Encoded)', 'Town (Encoded)', 'Flat Type 2 Room', 'Flat Type 3 Room', 'Flat Type 4 Room', 'Flat Type 5 Room', 'Flat Type Executive', 'Flat Type Multi Generation',
+    'Storey Range Low', 'Storey Range Medium', 'Storey Range High',
 ]
 
 # Set up page title and header
@@ -94,9 +93,14 @@ if st.button("Predict"):
 
     # Use the model to make a prediction
     try:
+        # Log-transformed resale price prediction
         prediction_log = model.predict(user_input_array)
-        # Exponentiate the prediction (if the model returns log-transformed price)
+        
+        # If the model predicts in log scale, exponentiate the result to get the actual resale price
         prediction_actual = np.exp(prediction_log)
+        
+        # Display the predicted values
+        st.success(f"The predicted log resale price is: **${prediction_log[0]:,.2f}**")
         st.success(f"The predicted resale price is: **${prediction_actual[0]:,.2f}**")
     except Exception as e:
         st.error(f"Error: {e}")
