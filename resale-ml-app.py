@@ -11,6 +11,9 @@ model = joblib.load('GBR_model.pkl')
 # Load the dataset from CSV
 df = pd.read_csv("ResaleflatpricesbasedonregistrationdatefromJan2017onwards.csv")
 
+# Load the trained columns (ensure to use this as a reference to align input data)
+trained_columns = joblib.load('X_encoded_columns.pkl')  # Replace with your actual path
+
 st.write("""
 # Custom Dataset Prediction App
 This app predicts the **target variable** based on input features!
@@ -68,8 +71,11 @@ user_features = user_input_features()
 st.subheader('User Input Parameters')
 st.write(user_features)
 
-# Convert the input features to numpy array (for prediction)
-user_input_array = np.array(user_features).reshape(1, -1)
+# Ensure the input aligns with the trained model columns
+aligned_data = user_features.reindex(columns=trained_columns, fill_value=0)
+
+# Convert the aligned input features to numpy array (for prediction)
+user_input_array = np.array(aligned_data).reshape(1, -1)
 
 # Debug: Check the shape of the input array
 print(f"Input shape: {user_input_array.shape}")  # Debugging step
@@ -83,8 +89,10 @@ prediction_actual = np.exp(prediction_log)  # Convert log-predicted value back t
 st.subheader('Prediction')
 st.write(f"The predicted value (actual scale) is: **{prediction_actual[0]:.2f}**")
 
-X= df.drop(['log_resale_price','resale_price'],axis=1).to_numpy()
-y=df['log_resale_price'].to_numpy()
+# Optional: Evaluate model performance with a test dataset
+# Note: If you want to perform this, make sure to define X_train, y_train, X_test, and y_test from your actual dataset
+X = df.drop(['log_resale_price', 'resale_price'], axis=1).to_numpy()  # Remove the target columns for features
+y = df['log_resale_price'].to_numpy()  # Use log_resale_price as the target
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 y_test_pred = model.predict(X_test)
