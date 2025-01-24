@@ -8,7 +8,8 @@ model = joblib.load('GBR_model.pkl')
 
 # Load the dataset used for training to extract unique values for categorical features
 # Make sure you load the same dataset that was used for training (replace this with your dataset path)
-data = pd.read_csv('path_to_training_data.csv')
+data = pd.read_csv("ResaleflatpricesbasedonregistrationdatefromJan2017onwards.csv")
+
 
 # Extract unique categories from the dataset
 town_options = data['town'].unique()
