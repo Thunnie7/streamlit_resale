@@ -83,10 +83,8 @@ prediction_actual = np.exp(prediction_log)  # Convert log-predicted value back t
 st.subheader('Prediction')
 st.write(f"The predicted value (actual scale) is: **{prediction_actual[0]:.2f}**")
 
-# Optional: Evaluate model performance with a test dataset
-# Note: If you want to perform this, make sure to define X_train, y_train, X_test, and y_test from your actual dataset
-X = df.drop('resale_price', axis=1)  # Replace with the actual feature columns
-y = df['resale_price']  # Replace with the actual target column
+X= df.drop(['log_resale_price','resale_price'],axis=1).to_numpy()
+y=df['log_resale_price'].to_numpy()
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 y_test_pred = model.predict(X_test)
