@@ -6,15 +6,25 @@ import numpy as np
 # Load the pre-trained Gradient Boosting Regressor model
 model = joblib.load('GBR_model.pkl')
 
+# Load the dataset used for training to extract unique values for categorical features
+# Make sure you load the same dataset that was used for training (replace this with your dataset path)
+data = pd.read_csv('path_to_training_data.csv')
+
+# Extract unique categories from the dataset
+town_options = data['town'].unique()
+flat_type_options = data['flat_type'].unique()
+storey_range_options = data['storey_range'].unique()
+flat_model_options = data['flat_model'].unique()
+
 # Manually define the column names based on your training setup
 trained_columns = [
-    'Floor Area (sqm)', 'House Age (Years)', 'Year of Sale', 'Block Number (Numeric)',
+    'floor Area (sqm)', 'House Age (Years)', 'Year of Sale', 'Block Number (Numeric)',
     'Flat Model (Encoded)', 'Town (Encoded)', 'Flat Type 2 Room', 'Flat Type 3 Room', 'Flat Type 4 Room', 'Flat Type 5 Room', 'Flat Type Executive', 'Flat Type Multi Generation','Storey Range Low', 'Storey Range Medium', 'Storey Range High',
 ]
 
 # Set up page title and header
-st.set_page_config(page_title="🏠 House Resale Price Prediction", layout="wide")
-st.title("🏠 House Resale Price Prediction")
+st.set_page_config(page_title="House Resale Price Prediction", layout="wide")
+st.title("House Resale Price Prediction")
 st.markdown("This app predicts the resale price of a house based on various input features. Fill in the form below and hit **Predict**!")
 
 # Sidebar for user inputs
@@ -35,8 +45,8 @@ with col2:
 
 # Column 3 inputs
 with col3:
-    flat_model_encoded = st.number_input("Flat Model (Encoded)", min_value=0, max_value=10, value=2)
-    town_encoded = st.number_input("Town (Encoded)", min_value=0, max_value=30, value=15)
+    flat_model_encoded = st.selectbox("Select Flat Model (Encoded)", flat_model_options)
+    town_encoded = st.selectbox("Select Town (Encoded)", town_options)
 
 # One-hot encoded flat types
 flat_type_2_room = st.radio("Is it a 2 ROOM?", [0, 1], index=0)
