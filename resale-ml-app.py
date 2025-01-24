@@ -12,7 +12,8 @@ model = joblib.load('GBR_model.pkl')
 # Manually define the column names based on your training setup
 trained_columns = [
     'Floor Area (sqm)', 'House Age (Years)', 'Year of Sale', 'Block Number (Numeric)',
-    'Flat Model (Encoded)', 'Town (Encoded)', 'Storey Range Low', 'Storey Range Medium', 'Storey Range High'
+    'Flat Model (Encoded)', 'Town (Encoded)', 'Storey Range Low', 'Storey Range Medium', 'Storey Range High',
+    'Flat Type 2 Room', 'Flat Type 3 Room', 'Flat Type 4 Room', 'Flat Type 5 Room', 'Flat Type Executive', 'Flat Type Multi Generation'
 ]
 
 # Load the dataset from CSV for reference
@@ -56,6 +57,21 @@ def user_input_features():
 
     data['Storey Range Low'], data['Storey Range Medium'], data['Storey Range High'] = storey_range_binned[storey_range]
 
+    # Handle Flat Types (2 Room, 3 Room, 4 Room, etc.) using radio buttons
+    flat_type_2_room = st.sidebar.radio("Is it a 2 ROOM?", [0, 1])
+    flat_type_3_room = st.sidebar.radio("Is it a 3 ROOM?", [0, 1])
+    flat_type_4_room = st.sidebar.radio("Is it a 4 ROOM?", [0, 1])
+    flat_type_5_room = st.sidebar.radio("Is it a 5 ROOM?", [0, 1])
+    flat_type_executive = st.sidebar.radio("Is it an EXECUTIVE?", [0, 1])
+    flat_type_multi_generation = st.sidebar.radio("Is it a MULTI-GENERATION?", [0, 1])
+
+    data['Flat Type 2 Room'] = flat_type_2_room
+    data['Flat Type 3 Room'] = flat_type_3_room
+    data['Flat Type 4 Room'] = flat_type_4_room
+    data['Flat Type 5 Room'] = flat_type_5_room
+    data['Flat Type Executive'] = flat_type_executive
+    data['Flat Type Multi Generation'] = flat_type_multi_generation
+
     features = pd.DataFrame(data, index=[0])
     return features
 
@@ -69,7 +85,7 @@ st.write(user_features)
 label_encoder_town = LabelEncoder()
 label_encoder_flat_model = LabelEncoder()
 
-# Assuming your training data contains label-encoded values for town and flat model, you would encode the input
+# For Label Encoding of 'town_encoded' and 'flat_model_encoded'
 user_features['Town (Encoded)'] = label_encoder_town.fit_transform(user_features['Town (Encoded)'])
 user_features['Flat Model (Encoded)'] = label_encoder_flat_model.fit_transform(user_features['Flat Model (Encoded)'])
 
@@ -80,13 +96,13 @@ aligned_user_input = user_features.reindex(columns=trained_columns, fill_value=0
 user_input_array = aligned_user_input.to_numpy()
 
 # Debug: Check the shape of the input array
-st.write(f"Input shape: {user_input_array.shape}") # Debugging step
+st.write(f"Input shape: {user_input_array.shape}")  # Debugging step
 
 # Use the loaded model to make a prediction
-prediction_log = model.predict(user_input_array) # Pass the input array to predict()
+prediction_log = model.predict(user_input_array)  # Pass the input array to predict()
 
 # Exponentiate the prediction to get back to the original resale price
-prediction_actual = np.exp(prediction_log) # Convert log-predicted value back to original scale
+prediction_actual = np.exp(prediction_log)  # Convert log-predicted value back to original scale
 
 st.subheader('Prediction')
 st.write(f"The predicted resale price (actual scale) is: **${prediction_actual[0]:,.2f}**")
