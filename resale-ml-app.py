@@ -1,17 +1,24 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
-import joblib
 
 # Load the pre-trained Gradient Boosting Regressor model
 model = joblib.load('GBR_model.pkl')
 
-# Load the dataset from CSV
+# Manually define the column names based on your training setup
+trained_columns = [
+    'Floor Area (sqm)', 'House Age (Years)', 'Year of Sale', 'Block Number (Numeric)',
+    'Flat Model (Encoded)', 'Town (Encoded)', 'Flat Type 2 Room', 'Flat Type 3 Room',
+    'Flat Type 4 Room', 'Flat Type 5 Room', 'Flat Type Executive', 'Flat Type Multi Generation',
+    'Storey Range Low', 'Storey Range Medium', 'Storey Range High'
+]
+
+# Load the dataset from CSV for reference
 df = pd.read_csv("ResaleflatpricesbasedonregistrationdatefromJan2017onwards.csv")
 
-# Assuming your 'log_resale_price' column is already created during training
 st.write("""
 # Custom Dataset Prediction App
 This app predicts the **target variable** based on input features!
@@ -62,15 +69,20 @@ def user_input_features():
     features = pd.DataFrame(data, index=[0])
     return features
 
-
 # Get user input features
 user_features = user_input_features()
 
 st.subheader('User Input Parameters')
 st.write(user_features)
 
-# Convert the input features to numpy array (for prediction)
-user_input_array = np.array(user_features).reshape(1, -1)
+# Align the user input to match the trained model's features
+aligned_user_input = user_features.reindex(columns=trained_columns, fill_value=0)
+
+# Convert the aligned DataFrame to numpy array for prediction
+user_input_array = aligned_user_input.to_numpy()
+
+# Debug: Check the shape of the input array
+st.write(f"Input shape: {user_input_array.shape}")  # Debugging step
 
 # Use the loaded model to make a prediction
 prediction_log = model.predict(user_input_array)  # This is the log prediction
@@ -79,10 +91,9 @@ prediction_log = model.predict(user_input_array)  # This is the log prediction
 prediction_actual = np.exp(prediction_log)  # Convert log-predicted value back to original scale
 
 st.subheader('Prediction')
-st.write(f"The predicted value (actual scale) is: **{prediction_actual[0]:,.2f}**")
+st.write(f"The predicted resale price (actual scale) is: **${prediction_actual[0]:,.2f}**")
 
 # Optional: Evaluate model performance with a test dataset
-# Note: If you want to perform this, make sure to define X_train, y_train, X_test, and y_test from your actual dataset
 X = df.drop(['log_resale_price', 'resale_price'], axis=1).to_numpy()
 y = df['log_resale_price'].to_numpy()
 
