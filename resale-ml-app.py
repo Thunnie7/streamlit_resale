@@ -9,9 +9,8 @@ model = joblib.load('GBR_model.pkl')
 # Manually define the column names based on your training setup
 trained_columns = [
     'Floor Area (sqm)', 'House Age (Years)', 'Year of Sale', 'Block Number (Numeric)',
-    'Flat Model (Encoded)', 'Town (Encoded)', 'Storey Range Low', 'Storey Range Medium', 'Storey Range High',
-    'Flat Type 2 Room', 'Flat Type 3 Room', 'Flat Type 4 Room', 'Flat Type 5 Room', 'Flat Type Executive', 'Flat Type Multi Generation',
-    'Storey Range Low', 'Storey Range Medium', 'Storey Range High'
+    'Flat Model (Encoded)', 'Town (Encoded)', 'Flat Type 2 Room', 'Flat Type 3 Room', 'Flat Type 4 Room', 'Flat Type 5 Room', 'Flat Type Executive', 'Flat Type Multi Generation','Storey Range Low', 'Storey Range Medium', 'Storey Range High',
+    
 ]
 
 # Set up page title and header
@@ -27,12 +26,11 @@ with col1:
 
 with col2:
     year = st.number_input("Year of Sale", min_value=2000, max_value=2025)
-    town_encoded = st.number_input("Town (Encoded)", min_value=0, max_value=30)
+    block_numeric = st.number_input("Block Number (Numeric)", min_value=1, max_value=999)
 
 with col3:
-    storey_range_low = st.number_input("Storey Range Low", min_value=0, max_value=1)
-    storey_range_medium = st.number_input("Storey Range Medium", min_value=0, max_value=1)
-    storey_range_high = st.number_input("Storey Range High", min_value=0, max_value=1)
+    flat_model_encoded = st.number_input("Flat Model (Encoded)", min_value=0, max_value=10)
+    town_encoded = st.number_input("Town (Encoded)", min_value=0, max_value=30)
 
 # One-hot encoded flat types
 flat_type_2_room = st.radio("Is it a 2 ROOM?", [0, 1])
@@ -42,12 +40,19 @@ flat_type_5_room = st.radio("Is it a 5 ROOM?", [0, 1])
 flat_type_executive = st.radio("Is it an EXECUTIVE?", [0, 1])
 flat_type_multi_generation = st.radio("Is it a MULTI-GENERATION?", [0, 1])
 
+# One-hot encoded storey range
+storey_range_binned_low = st.radio("Is the storey range Low?", [0, 1])
+storey_range_binned_medium = st.radio("Is the storey range Medium?", [0, 1])
+storey_range_binned_high = st.radio("Is the storey range High?", [0, 1])
+
 # Prediction button
 if st.button("Predict"):
     features = [[
         floor_area_sqm,
         house_age,
         year,
+        block_numeric,
+        flat_model_encoded,
         town_encoded,
         flat_type_2_room,
         flat_type_3_room,
@@ -55,9 +60,9 @@ if st.button("Predict"):
         flat_type_5_room,
         flat_type_executive,
         flat_type_multi_generation,
-        storey_range_low,
-        storey_range_medium,
-        storey_range_high
+        storey_range_binned_low,
+        storey_range_binned_medium,
+        storey_range_binned_high
     ]]
 
     # Reshape the feature array to match the model's input shape
@@ -68,3 +73,7 @@ if st.button("Predict"):
         st.success(f"The predicted resale price is: **${prediction_actual[0]:,.2f}**")
     except Exception as e:
         st.error(f"Error: {e}")
+
+# Footer
+st.markdown("---")
+st.markdown("🔖 **Disclaimer**: This is a prototype app. Predictions are for demonstration purposes only.")
