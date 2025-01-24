@@ -49,9 +49,9 @@ def user_input_features():
 
     # Storey range binning
     storey_range_binned = {
-        'Low': [1, 0, 0],  # Low storey
+        'Low': [1, 0, 0],    # Low storey
         'Medium': [0, 1, 0],  # Medium storey
-        'High': [0, 0, 1],  # High storey
+        'High': [0, 0, 1],   # High storey
     }
 
     data['Storey Range Low'], data['Storey Range Medium'], data['Storey Range High'] = storey_range_binned[storey_range]
@@ -80,13 +80,13 @@ aligned_user_input = user_features.reindex(columns=trained_columns, fill_value=0
 user_input_array = aligned_user_input.to_numpy()
 
 # Debug: Check the shape of the input array
-st.write(f"Input shape: {user_input_array.shape}")  # Debugging step
+st.write(f"Input shape: {user_input_array.shape}") # Debugging step
 
 # Use the loaded model to make a prediction
-prediction_log = model.predict(user_input_array)  # This is the log prediction
+prediction_log = model.predict(user_input_array) # Pass the input array to predict()
 
 # Exponentiate the prediction to get back to the original resale price
-prediction_actual = np.exp(prediction_log)  # Convert log-predicted value back to original scale
+prediction_actual = np.exp(prediction_log) # Convert log-predicted value back to original scale
 
 st.subheader('Prediction')
 st.write(f"The predicted resale price (actual scale) is: **${prediction_actual[0]:,.2f}**")
