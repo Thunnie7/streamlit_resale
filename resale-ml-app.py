@@ -89,7 +89,7 @@ label_encoder_flat_model = LabelEncoder()
 user_features['Town (Encoded)'] = label_encoder_town.fit_transform(user_features['Town (Encoded)'])
 user_features['Flat Model (Encoded)'] = label_encoder_flat_model.fit_transform(user_features['Flat Model (Encoded)'])
 
-# Align the user input to match the trained model's features
+# Ensure that the user input has the same columns as the trained model
 aligned_user_input = user_features.reindex(columns=trained_columns, fill_value=0)
 
 # Convert the aligned DataFrame to numpy array for prediction
@@ -97,6 +97,7 @@ user_input_array = aligned_user_input.to_numpy()
 
 # Debug: Check the shape of the input array
 st.write(f"User input array shape: {user_input_array.shape}")
+st.write(f"Input shape: {user_input_array.shape}")  # Ensure it's (1, N)
 
 # Use the loaded model to make a prediction
 prediction_log = model.predict(user_input_array)  # Pass the input array to predict()
