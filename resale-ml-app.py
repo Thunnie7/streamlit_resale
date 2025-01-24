@@ -1,48 +1,84 @@
 import streamlit as st
-import joblib
+import pandas as pd
 import numpy as np
+from sklearn.ensemble import GradientBoostingRegressor  
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
 
-# Load the trained model
-model = joblib.load("GBR_model.pkl")
+st.write("""
+# Custom Dataset Prediction App
+This app predicts the **target variable** based on input features!
+""")
 
-# Title of the app
-st.title("Resale Price Prediction App")
-st.write("Predict resale prices based on input features!")
+st.sidebar.header('User Input Parameters')
 
-# Input fields for the model
-floor_area_sqm = st.number_input("Floor Area (sqm)", min_value=10.0, max_value=200.0, step=1.0)
-house_age = st.number_input("House Age (Years)", min_value=0.0, max_value=99.0, step=1.0)
-year = st.number_input("Year of Sale", min_value=2000, max_value=2025, step=1)
-block_numeric = st.number_input("Block Number (Numeric)", min_value=1, max_value=999, step=1)
-flat_model_encoded = st.number_input("Flat Model (Encoded)", min_value=0, max_value=10, step=1)
-town_encoded = st.number_input("Town (Encoded)", min_value=0, max_value=30, step=1)
+# Define the input features for your dataset
+def user_input_features():
+    floor_area_sqm = st.sidebar.slider('Floor Area (sqm)', 10.0, 200.0, 50.0)
+    house_age = st.sidebar.slider('House Age (Years)', 0, 99, 30)
+    year = st.sidebar.slider('Year of Sale', 2000, 2025, 2020)
+    block_numeric = st.sidebar.slider('Block Number (Numeric)', 1, 999, 100)
+    flat_model_encoded = st.sidebar.slider('Flat Model (Encoded)', 0, 10, 2)
+    town_encoded = st.sidebar.slider('Town (Encoded)', 0, 30, 15)
+    
+    # One-hot encoded flat type
+    flat_type_2_room = st.sidebar.radio("Is it a 2 ROOM?", [0, 1])
+    flat_type_3_room = st.sidebar.radio("Is it a 3 ROOM?", [0, 1])
+    flat_type_4_room = st.sidebar.radio("Is it a 4 ROOM?", [0, 1])
+    flat_type_5_room = st.sidebar.radio("Is it a 5 ROOM?", [0, 1])
+    flat_type_executive = st.sidebar.radio("Is it an EXECUTIVE?", [0, 1])
+    flat_type_multi_generation = st.sidebar.radio("Is it a MULTI-GENERATION?", [0, 1])
 
-# One-hot encoded flat type
-flat_type_2_room = st.radio("Is it a 2 ROOM?", [0, 1])
-flat_type_3_room = st.radio("Is it a 3 ROOM?", [0, 1])
-flat_type_4_room = st.radio("Is it a 4 ROOM?", [0, 1])
-flat_type_5_room = st.radio("Is it a 5 ROOM?", [0, 1])
-flat_type_executive = st.radio("Is it an EXECUTIVE?", [0, 1])
-flat_type_multi_generation = st.radio("Is it a MULTI-GENERATION?", [0, 1])
+    # One-hot encoded storey range
+    storey_range_binned_low = st.sidebar.radio("Is the storey range Low?", [0, 1])
+    storey_range_binned_medium = st.sidebar.radio("Is the storey range Medium?", [0, 1])
+    storey_range_binned_high = st.sidebar.radio("Is the storey range High?", [0, 1])
 
-# One-hot encoded storey range
-storey_range_binned_low = st.radio("Is the storey range Low?", [0, 1])
-storey_range_binned_medium = st.radio("Is the storey range Medium?", [0, 1])
-storey_range_binned_high = st.radio("Is the storey range High?", [0, 1])
+    data = {
+        'Floor Area (sqm)': floor_area_sqm,
+        'House Age (Years)': house_age,
+        'Year of Sale': year,
+        'Block Number (Numeric)': block_numeric,
+        'Flat Model (Encoded)': flat_model_encoded,
+        'Town (Encoded)': town_encoded,
+        'Flat Type 2 Room': flat_type_2_room,
+        'Flat Type 3 Room': flat_type_3_room,
+        'Flat Type 4 Room': flat_type_4_room,
+        'Flat Type 5 Room': flat_type_5_room,
+        'Flat Type Executive': flat_type_executive,
+        'Flat Type Multi Generation': flat_type_multi_generation,
+        'Storey Range Low': storey_range_binned_low,
+        'Storey Range Medium': storey_range_binned_medium,
+        'Storey Range High': storey_range_binned_high
+    }
+    features = pd.DataFrame(data, index=[0])
+    return features
 
-# Create a predict button
-if st.button("Predict Resale Price"):
-    # Prepare input features
-    input_features = [
-        floor_area_sqm, house_age, year, block_numeric, flat_model_encoded, town_encoded,
-        flat_type_2_room, flat_type_3_room, flat_type_4_room, flat_type_5_room,
-        flat_type_executive, flat_type_multi_generation,
-        storey_range_binned_low, storey_range_binned_medium, storey_range_binned_high
-    ]
-    input_array = np.array(input_features).reshape(1, -1)
+df = user_input_features()
 
-    # Predict resale price
-    predicted_price = model.predict(input_array)
+st.subheader('User Input Parameters')
+st.write(df)
 
-    # Display the prediction
-    st.success(f"The predicted resale price is: ${predicted_price[0]:,.2f}")
+# Simulating a dataset for this example (replace this with your actual data)
+# Example dataset with appropriate features
+np.random.seed(42)
+X = np.random.rand(1000, 15)  # Replace this with your actual feature matrix (15 features as per the input)
+y = np.random.rand(1000)      # Replace with your actual target variable (e.g., resale price)
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train a Gradient Boosting Regressor model
+model = GradientBoostingRegressor(random_state=42)
+model.fit(X_train, y_train)
+
+# Make predictions
+prediction = model.predict(df)
+
+st.subheader('Prediction')
+st.write(f"The predicted value is: **{prediction[0]:.2f}**")
+
+# Evaluate model performance (optional, if needed for testing)
+y_test_pred = model.predict(X_test)
+mse = mean_squared_error(y_test, y_test_pred)
+st.write(f"Model Mean Squared Error (MSE) on test data: **{mse:.2f}**")
