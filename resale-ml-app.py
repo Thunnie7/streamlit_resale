@@ -8,7 +8,6 @@ import joblib
 # Load the pre-trained Gradient Boosting Regressor model
 model = joblib.load('GBR_model.pkl')
 
-
 # Load the dataset from CSV
 df = pd.read_csv("ResaleflatpricesbasedonregistrationdatefromJan2017onwards.csv")
 
@@ -68,11 +67,17 @@ user_features = user_input_features()
 st.subheader('User Input Parameters')
 st.write(user_features)
 
+# Convert the input features to numpy array (for prediction)
+user_input_array = np.array(user_features).reshape(1, -1)
+
 # Use the loaded model to make a prediction
-prediction = model.predict(user_features)
+prediction_log = model.predict(user_input_array)  # This is the log prediction
+
+# Exponentiate the prediction to get back to the original resale price
+prediction_actual = np.exp(prediction_log)  # Convert log-predicted value back to original scale
 
 st.subheader('Prediction')
-st.write(f"The predicted value is: **{prediction[0]:.2f}**")
+st.write(f"The predicted value (actual scale) is: **{prediction_actual[0]:.2f}**")
 
 # Optional: Evaluate model performance with a test dataset
 # Note: If you want to perform this, make sure to define X_train, y_train, X_test, and y_test from your actual dataset
