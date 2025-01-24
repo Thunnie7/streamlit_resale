@@ -1,6 +1,7 @@
-import joblib
-import numpy as np
+import streamlit as st
 import pandas as pd
+import numpy as np
+import joblib
 
 # Load the pre-trained Gradient Boosting Regressor model
 model = joblib.load('GBR_model.pkl')
@@ -34,8 +35,11 @@ def predict_resale_price(floor_area_sqm, house_age, year, block_numeric, flat_mo
     # Convert the input features into numpy array for prediction
     user_input_array = np.array(features).reshape(1, -1)
 
+    # Ensure that the input array has the correct shape
+    print("Shape of user input array:", user_input_array.shape)
+
     # Use the model to predict the log price
-    predicted_log_price = model.predict(user_input_array)
+    predicted_log_price = model.predict(user_input_array)  # This is the log prediction
 
     # Exponentiate the log prediction to get the actual price
     predicted_actual_price = np.exp(predicted_log_price)
