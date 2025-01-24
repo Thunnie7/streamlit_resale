@@ -81,6 +81,7 @@ user_features = user_input_features()
 st.subheader('User Input Parameters')
 st.write(user_features)
 
+
 # Apply Label Encoding for Town and Flat Model (assuming you used LabelEncoder during training)
 label_encoder_town = LabelEncoder()
 label_encoder_flat_model = LabelEncoder()
@@ -96,7 +97,11 @@ aligned_user_input = user_features.reindex(columns=trained_columns, fill_value=0
 user_input_array = aligned_user_input.to_numpy()
 
 # Debug: Check the shape of the input array
-st.write(f"Input shape: {user_input_array.shape}")  # Debugging step
+
+st.write(f"User input array shape: {user_input_array.shape}")
+st.write(f"Input shape: {user_input_array.shape}")  # Ensure it's (1, N)
+
+
 
 # Use the loaded model to make a prediction
 prediction_log = model.predict(user_input_array)  # Pass the input array to predict()
