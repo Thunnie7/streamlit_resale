@@ -75,6 +75,9 @@ if st.button("Predict"):
     # Align features to match trained model columns
     aligned_user_input = pd.DataFrame(features, columns=trained_columns)
 
+    # Ensure the DataFrame columns match exactly with the trained columns order
+    aligned_user_input = aligned_user_input[trained_columns]
+
     # Convert the features to numpy array for prediction
     user_input_array = aligned_user_input.to_numpy()
 
