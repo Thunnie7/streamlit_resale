@@ -108,7 +108,7 @@ if st.button("Predict"):
         )
 
         # Display the predictions
-        st.success(f"Predicted Log Resale Price: {predicted_log_price:.2f}")
+        
         st.success(f"Predicted Actual Resale Price: **${predicted_actual_price:,.2f}**")
     except Exception as e:
         st.error(f"Error: {e}")
