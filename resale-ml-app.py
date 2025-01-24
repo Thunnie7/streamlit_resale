@@ -6,7 +6,7 @@ from sklearn.metrics import mean_squared_error
 import joblib
 
 # Load the pre-trained Gradient Boosting Regressor model
-model = joblib.load('MLDP/GBR_model.pkl')
+model = joblib.load('GBR_model.pkl')
 
 
 # Load the dataset from CSV
