@@ -6,6 +6,14 @@ import numpy as np
 # Load the pre-trained Gradient Boosting Regressor model
 model = joblib.load('GBR_model.pkl')
 
+# Manually define the column names based on your training setup
+trained_columns = [
+    'Floor Area (sqm)', 'House Age (Years)', 'Year of Sale', 'Block Number (Numeric)',
+    'Flat Model (Encoded)', 'Town (Encoded)', 'Storey Range Low', 'Storey Range Medium', 'Storey Range High',
+    'Flat Type 2 Room', 'Flat Type 3 Room', 'Flat Type 4 Room', 'Flat Type 5 Room', 'Flat Type Executive', 'Flat Type Multi Generation',
+    'Storey Range Low', 'Storey Range Medium', 'Storey Range High'
+]
+
 # Set up page title and header
 st.title("🏠 House Resale Price Prediction")
 st.markdown("This app predicts the resale price of a house based on various input features. Fill in the form below and hit **Predict**!")
@@ -51,7 +59,7 @@ if st.button("Predict"):
         storey_range_medium,
         storey_range_high
     ]]
-    
+
     # Reshape the feature array to match the model's input shape
     try:
         prediction_log = model.predict(features)
@@ -60,7 +68,3 @@ if st.button("Predict"):
         st.success(f"The predicted resale price is: **${prediction_actual[0]:,.2f}**")
     except Exception as e:
         st.error(f"Error: {e}")
-
-# Footer
-st.markdown("---")
-st.markdown("🔖 **Disclaimer**: This is a prototype app. Predictions are for demonstration purposes only.")
