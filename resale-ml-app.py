@@ -94,7 +94,21 @@ if st.button("Predict"):
     # Use the model to make a prediction
     try:
         # Log-transformed resale price prediction
-        prediction_log = model.predict(user_input_array)
+        prediction_log = model.predict(floor_area_sqm,
+        house_age,
+        year,
+        block_numeric,
+        flat_model_encoded,
+        town_encoded,
+        flat_type_2_room,
+        flat_type_3_room,
+        flat_type_4_room,
+        flat_type_5_room,
+        flat_type_executive,
+        flat_type_multi_generation,
+        storey_range_binned_low,
+        storey_range_binned_medium,
+        storey_range_binned_high)
         
         # If the model predicts in log scale, exponentiate the result to get the actual resale price
         prediction_actual = np.exp(prediction_log)
