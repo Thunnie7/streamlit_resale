@@ -89,3 +89,7 @@ y_test_pred = model.predict(X_test)
 mse = mean_squared_error(y_test, y_test_pred)
 
 st.write(f"Model Mean Squared Error (MSE) on test data: **{mse:.2f}**")
+
+
+user_input_array = np.array(user_features.values).reshape(1, -1)  # Ensure it's a numpy array
+print(user_input_array.shape)  # For debugging
