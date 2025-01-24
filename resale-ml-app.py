@@ -12,14 +12,14 @@ This app predicts the **target variable** based on input features!
 
 st.sidebar.header('User Input Parameters')
 
-# Define the input features for your dataset
+# Define the input features for your dataset using text input
 def user_input_features():
-    floor_area_sqm = st.sidebar.slider('Floor Area (sqm)', 10.0, 200.0, 50.0)
-    house_age = st.sidebar.slider('House Age (Years)', 0, 99, 30)
-    year = st.sidebar.slider('Year of Sale', 2000, 2025, 2020)
-    block_numeric = st.sidebar.slider('Block Number (Numeric)', 1, 999, 100)
-    flat_model_encoded = st.sidebar.slider('Flat Model (Encoded)', 0, 10, 2)
-    town_encoded = st.sidebar.slider('Town (Encoded)', 0, 30, 15)
+    floor_area_sqm = st.sidebar.text_input('Floor Area (sqm)', '50.0')  # Text input instead of slider
+    house_age = st.sidebar.text_input('House Age (Years)', '30')         # Text input instead of slider
+    year = st.sidebar.text_input('Year of Sale', '2020')                 # Text input instead of slider
+    block_numeric = st.sidebar.text_input('Block Number (Numeric)', '100')
+    flat_model_encoded = st.sidebar.text_input('Flat Model (Encoded)', '2')
+    town_encoded = st.sidebar.text_input('Town (Encoded)', '15')
     
     # One-hot encoded flat type
     flat_type_2_room = st.sidebar.radio("Is it a 2 ROOM?", [0, 1])
@@ -34,13 +34,14 @@ def user_input_features():
     storey_range_binned_medium = st.sidebar.radio("Is the storey range Medium?", [0, 1])
     storey_range_binned_high = st.sidebar.radio("Is the storey range High?", [0, 1])
 
+    # Convert text input to float and int for computation
     data = {
-        'Floor Area (sqm)': floor_area_sqm,
-        'House Age (Years)': house_age,
-        'Year of Sale': year,
-        'Block Number (Numeric)': block_numeric,
-        'Flat Model (Encoded)': flat_model_encoded,
-        'Town (Encoded)': town_encoded,
+        'Floor Area (sqm)': float(floor_area_sqm),
+        'House Age (Years)': float(house_age),
+        'Year of Sale': int(year),
+        'Block Number (Numeric)': int(block_numeric),
+        'Flat Model (Encoded)': int(flat_model_encoded),
+        'Town (Encoded)': int(town_encoded),
         'Flat Type 2 Room': flat_type_2_room,
         'Flat Type 3 Room': flat_type_3_room,
         'Flat Type 4 Room': flat_type_4_room,
@@ -73,10 +74,13 @@ model = GradientBoostingRegressor(random_state=42)
 model.fit(X_train, y_train)
 
 # Make predictions
-prediction = model.predict(df)
+prediction_log = model.predict(df)  # This is the log prediction
+
+# Exponentiate the prediction to get back to the original resale price
+prediction_actual = np.exp(prediction_log)  # Convert log-predicted value back to original scale
 
 st.subheader('Prediction')
-st.write(f"The predicted value is: **{prediction[0]:.2f}**")
+st.write(f"The predicted value (actual scale) is: **{prediction_actual[0]:.2f}**")
 
 # Evaluate model performance (optional, if needed for testing)
 y_test_pred = model.predict(X_test)
