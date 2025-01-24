@@ -1,23 +1,53 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
 import joblib
 
 # Load the pre-trained Gradient Boosting Regressor model
 model = joblib.load('GBR_model.pkl')
 
-# Define the function to predict resale price
-def predict_resale_price(floor_area_sqm, house_age, year, block_numeric, flat_model_encoded, town_encoded,
-                         flat_type_2_room, flat_type_3_room, flat_type_4_room, flat_type_5_room, flat_type_executive,
-                         flat_type_multi_generation, storey_range_binned_low, storey_range_binned_medium, storey_range_binned_high):
-    # Create a dictionary with the input features
+# Load the dataset from CSV
+df = pd.read_csv("ResaleflatpricesbasedonregistrationdatefromJan2017onwards.csv")
+
+st.write("""
+# Custom Dataset Prediction App
+This app predicts the **target variable** based on input features!
+""")
+
+st.sidebar.header('User Input Parameters')
+
+# Define the input features for your dataset using text input
+def user_input_features():
+    floor_area_sqm = st.sidebar.text_input('Floor Area (sqm)', '50.0')
+    house_age = st.sidebar.text_input('House Age (Years)', '30')
+    year = st.sidebar.text_input('Year of Sale', '2020')
+    block_numeric = st.sidebar.text_input('Block Number (Numeric)', '100')
+    flat_model_encoded = st.sidebar.text_input('Flat Model (Encoded)', '2')
+    town_encoded = st.sidebar.text_input('Town (Encoded)', '15')
+
+    # One-hot encoded flat type
+    flat_type_2_room = st.sidebar.radio("Is it a 2 ROOM?", [0, 1])
+    flat_type_3_room = st.sidebar.radio("Is it a 3 ROOM?", [0, 1])
+    flat_type_4_room = st.sidebar.radio("Is it a 4 ROOM?", [0, 1])
+    flat_type_5_room = st.sidebar.radio("Is it a 5 ROOM?", [0, 1])
+    flat_type_executive = st.sidebar.radio("Is it an EXECUTIVE?", [0, 1])
+    flat_type_multi_generation = st.sidebar.radio("Is it a MULTI-GENERATION?", [0, 1])
+
+    # One-hot encoded storey range
+    storey_range_binned_low = st.sidebar.radio("Is the storey range Low?", [0, 1])
+    storey_range_binned_medium = st.sidebar.radio("Is the storey range Medium?", [0, 1])
+    storey_range_binned_high = st.sidebar.radio("Is the storey range High?", [0, 1])
+
+    # Convert text input to float and int for computation
     data = {
-        'Floor Area (sqm)': floor_area_sqm,
-        'House Age (Years)': house_age,
-        'Year of Sale': year,
-        'Block Number (Numeric)': block_numeric,
-        'Flat Model (Encoded)': flat_model_encoded,
-        'Town (Encoded)': town_encoded,
+        'Floor Area (sqm)': float(floor_area_sqm),
+        'House Age (Years)': float(house_age),
+        'Year of Sale': int(year),
+        'Block Number (Numeric)': int(block_numeric),
+        'Flat Model (Encoded)': int(flat_model_encoded),
+        'Town (Encoded)': int(town_encoded),
         'Flat Type 2 Room': flat_type_2_room,
         'Flat Type 3 Room': flat_type_3_room,
         'Flat Type 4 Room': flat_type_4_room,
@@ -28,36 +58,38 @@ def predict_resale_price(floor_area_sqm, house_age, year, block_numeric, flat_mo
         'Storey Range Medium': storey_range_binned_medium,
         'Storey Range High': storey_range_binned_high
     }
-
-    # Convert input data into a DataFrame
     features = pd.DataFrame(data, index=[0])
+    return features
 
-    # Convert the input features into numpy array for prediction
-    user_input_array = np.array(features).reshape(1, -1)
 
-    # Ensure that the input array has the correct shape
-    print("Shape of user input array:", user_input_array.shape)
+# Get user input features
+user_features = user_input_features()
 
-    # Use the model to predict the log price
-    predicted_log_price = model.predict(user_input_array)  # This is the log prediction
+st.subheader('User Input Parameters')
+st.write(user_features)
 
-    # Exponentiate the log prediction to get the actual price
-    predicted_actual_price = np.exp(predicted_log_price)
+# Convert the input features to numpy array (for prediction)
+user_input_array = np.array(user_features).reshape(1, -1)
 
-    return predicted_log_price[0], predicted_actual_price[0]
+# Debug: Check the shape of the input array
+print(f"Input shape: {user_input_array.shape}")  # Debugging step
 
-# Example inputs
-predicted_log_price, predicted_actual_price = predict_resale_price(
-    floor_area_sqm=44.0,
-    house_age=37.666667,
-    year=2017,
-    block_numeric=406,
-    flat_model_encoded=5,
-    town_encoded=0,
-    flat_type_2_room=1, flat_type_3_room=0, flat_type_4_room=0,
-    flat_type_5_room=0, flat_type_executive=0, flat_type_multi_generation=0,
-    storey_range_binned_low=0, storey_range_binned_medium=1, storey_range_binned_high=0
-)
+# Use the loaded model to make a prediction
+prediction_log = model.predict(user_input_array)  # This is the log prediction
 
-print(f"Predicted Log Resale Price: {predicted_log_price}")
-print(f"Predicted Actual Resale Price: {predicted_actual_price}")
+# Exponentiate the prediction to get back to the original resale price
+prediction_actual = np.exp(prediction_log)  # Convert log-predicted value back to original scale
+
+st.subheader('Prediction')
+st.write(f"The predicted value (actual scale) is: **{prediction_actual[0]:.2f}**")
+
+# Optional: Evaluate model performance with a test dataset
+# Note: If you want to perform this, make sure to define X_train, y_train, X_test, and y_test from your actual dataset
+X = df.drop('resale_price', axis=1)  # Replace with the actual feature columns
+y = df['resale_price']  # Replace with the actual target column
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+y_test_pred = model.predict(X_test)
+mse = mean_squared_error(y_test, y_test_pred)
+
+st.write(f"Model Mean Squared Error (MSE) on test data: **{mse:.2f}**")
