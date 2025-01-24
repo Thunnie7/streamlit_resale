@@ -92,10 +92,12 @@ prediction_actual = np.exp(prediction_log)  # Convert log-predicted value back t
 st.subheader('Prediction')
 st.write(f"The predicted resale price (actual scale) is: **${prediction_actual[0]:,.2f}**")
 
-# Optional: Evaluate model performance with a test dataset (commented out since it's not needed)
-# X = df.drop(['log_resale_price', 'resale_price'], axis=1).to_numpy()
-# y = df['log_resale_price'].to_numpy()
-# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-# y_test_pred = model.predict(X_test)
-# mse = mean_squared_error(y_test, y_test_pred)
-# st.write(f"Model Mean Squared Error (MSE) on test data: **{mse:.2f}**")
+# Optional: Evaluate model performance with a test dataset
+X = df.drop(['log_resale_price', 'resale_price'], axis=1).to_numpy()
+y = df['log_resale_price'].to_numpy()
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+y_test_pred = model.predict(X_test)
+mse = mean_squared_error(y_test, y_test_pred)
+
+st.write(f"Model Mean Squared Error (MSE) on test data: **{mse:.2f}**")
