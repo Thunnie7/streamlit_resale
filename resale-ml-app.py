@@ -4,6 +4,7 @@ import numpy as np
 import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import LabelEncoder
 
 # Load the pre-trained Gradient Boosting Regressor model
 model = joblib.load('GBR_model.pkl')
@@ -11,9 +12,7 @@ model = joblib.load('GBR_model.pkl')
 # Manually define the column names based on your training setup
 trained_columns = [
     'Floor Area (sqm)', 'House Age (Years)', 'Year of Sale', 'Block Number (Numeric)',
-    'Flat Model (Encoded)', 'Town (Encoded)', 'Flat Type 2 Room', 'Flat Type 3 Room',
-    'Flat Type 4 Room', 'Flat Type 5 Room', 'Flat Type Executive', 'Flat Type Multi Generation',
-    'Storey Range Low', 'Storey Range Medium', 'Storey Range High'
+    'Flat Model (Encoded)', 'Town (Encoded)', 'Storey Range Low', 'Storey Range Medium', 'Storey Range High'
 ]
 
 # Load the dataset from CSV for reference
@@ -35,19 +34,6 @@ def user_input_features():
     flat_model_encoded = st.sidebar.text_input('Flat Model (Encoded)', '2')
     town_encoded = st.sidebar.text_input('Town (Encoded)', '15')
 
-    # One-hot encoded flat type
-    flat_type_2_room = st.sidebar.radio("Is it a 2 ROOM?", [0, 1])
-    flat_type_3_room = st.sidebar.radio("Is it a 3 ROOM?", [0, 1])
-    flat_type_4_room = st.sidebar.radio("Is it a 4 ROOM?", [0, 1])
-    flat_type_5_room = st.sidebar.radio("Is it a 5 ROOM?", [0, 1])
-    flat_type_executive = st.sidebar.radio("Is it an EXECUTIVE?", [0, 1])
-    flat_type_multi_generation = st.sidebar.radio("Is it a MULTI-GENERATION?", [0, 1])
-
-    # One-hot encoded storey range
-    storey_range_binned_low = st.sidebar.radio("Is the storey range Low?", [0, 1])
-    storey_range_binned_medium = st.sidebar.radio("Is the storey range Medium?", [0, 1])
-    storey_range_binned_high = st.sidebar.radio("Is the storey range High?", [0, 1])
-
     # Convert text input to float and int for computation
     data = {
         'Floor Area (sqm)': float(floor_area_sqm),
@@ -56,16 +42,20 @@ def user_input_features():
         'Block Number (Numeric)': int(block_numeric),
         'Flat Model (Encoded)': int(flat_model_encoded),
         'Town (Encoded)': int(town_encoded),
-        'Flat Type 2 Room': flat_type_2_room,
-        'Flat Type 3 Room': flat_type_3_room,
-        'Flat Type 4 Room': flat_type_4_room,
-        'Flat Type 5 Room': flat_type_5_room,
-        'Flat Type Executive': flat_type_executive,
-        'Flat Type Multi Generation': flat_type_multi_generation,
-        'Storey Range Low': storey_range_binned_low,
-        'Storey Range Medium': storey_range_binned_medium,
-        'Storey Range High': storey_range_binned_high
     }
+
+    # Storey range binning: Storey range will be transformed into bins
+    storey_range = st.sidebar.selectbox("Storey Range", ['Low', 'Medium', 'High'])
+
+    # Storey range binning
+    storey_range_binned = {
+        'Low': [1, 0, 0],  # Low storey
+        'Medium': [0, 1, 0],  # Medium storey
+        'High': [0, 0, 1],  # High storey
+    }
+
+    data['Storey Range Low'], data['Storey Range Medium'], data['Storey Range High'] = storey_range_binned[storey_range]
+
     features = pd.DataFrame(data, index=[0])
     return features
 
@@ -74,6 +64,14 @@ user_features = user_input_features()
 
 st.subheader('User Input Parameters')
 st.write(user_features)
+
+# Apply Label Encoding for Town and Flat Model (assuming you used LabelEncoder during training)
+label_encoder_town = LabelEncoder()
+label_encoder_flat_model = LabelEncoder()
+
+# Assuming your training data contains label-encoded values for town and flat model, you would encode the input
+user_features['Town (Encoded)'] = label_encoder_town.fit_transform(user_features['Town (Encoded)'])
+user_features['Flat Model (Encoded)'] = label_encoder_flat_model.fit_transform(user_features['Flat Model (Encoded)'])
 
 # Align the user input to match the trained model's features
 aligned_user_input = user_features.reindex(columns=trained_columns, fill_value=0)
