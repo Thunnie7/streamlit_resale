@@ -85,30 +85,74 @@ storey_range_binned_low = st.radio("Is the storey range Low?", [0, 1], index=0)
 storey_range_binned_medium = st.radio("Is the storey range Medium?", [0, 1], index=1)
 storey_range_binned_high = st.radio("Is the storey range High?", [0, 1], index=0)
 
-# Prediction button
 if st.button("Predict"):
-    try:
-        # Call the prediction function
-        predicted_log_price, predicted_actual_price = predict_resale_price(
-            floor_area_sqm,
-            house_age,
-            year,
-            block_numeric,
-            flat_model_encoded,
-            town_encoded,
-            flat_type_2_room,
-            flat_type_3_room,
-            flat_type_4_room,
-            flat_type_5_room,
-            flat_type_executive,
-            flat_type_multi_generation,
-            storey_range_binned_low,
-            storey_range_binned_medium,
-            storey_range_binned_high
-        )
+    # Ensure categorical variables are numerically encoded
+    flat_model_encoded = flat_model_options.tolist().index(flat_model_encoded)
+    town_encoded = town_options.tolist().index(town_encoded)
 
-        # Display the predictions
-        st.success(f"Predicted Log Resale Price: {predicted_log_price:.2f}")
-        st.success(f"Predicted Actual Resale Price: **${predicted_actual_price:,.2f}**")
+    # Collect features into a structured list
+    features = [[
+        floor_area_sqm,
+        house_age,
+        year,
+        block_numeric,
+        flat_model_encoded,
+        town_encoded,
+        flat_type_2_room,
+        flat_type_3_room,
+        flat_type_4_room,
+        flat_type_5_room,
+        flat_type_executive,
+        flat_type_multi_generation,
+        storey_range_binned_low,
+        storey_range_binned_medium,
+        storey_range_binned_high
+    ]]
+
+    # Convert to DataFrame and ensure alignment with trained model
+    aligned_user_input = pd.DataFrame(features, columns=trained_columns)
+
+    # Ensure the input is properly formatted as 2D NumPy array
+    user_input_array = np.array(aligned_user_input).reshape(1, -1)
+
+    # Debug output
+    st.write("Input to model:", user_input_array)
+    st.write("Shape of input:", user_input_array.shape)
+
+    # Predict
+    try:
+        prediction_log = model.predict(user_input_array)
+        prediction_actual = np.exp(prediction_log)  # Convert from log scale
+
+        st.success(f"The predicted log resale price is: **${prediction_log[0]:,.2f}**")
+        st.success(f"The predicted resale price is: **${prediction_actual[0]:,.2f}**")
     except Exception as e:
         st.error(f"Error: {e}")
+
+# # Prediction button
+# if st.button("Predict"):
+#     try:
+#         # Call the prediction function
+#         predicted_log_price, predicted_actual_price = predict_resale_price(
+#             floor_area_sqm,
+#             house_age,
+#             year,
+#             block_numeric,
+#             flat_model_encoded,
+#             town_encoded,
+#             flat_type_2_room,
+#             flat_type_3_room,
+#             flat_type_4_room,
+#             flat_type_5_room,
+#             flat_type_executive,
+#             flat_type_multi_generation,
+#             storey_range_binned_low,
+#             storey_range_binned_medium,
+#             storey_range_binned_high
+#         )
+
+#         # Display the predictions
+#         st.success(f"Predicted Log Resale Price: {predicted_log_price:.2f}")
+#         st.success(f"Predicted Actual Resale Price: **${predicted_actual_price:,.2f}**")
+#     except Exception as e:
+#         st.error(f"Error: {e}")
