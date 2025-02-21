@@ -119,18 +119,23 @@ import pandas as pd
 import numpy as np
 
 # Load the pre-trained Gradient Boosting Regressor model
-model = joblib.load('GBR_model.pkl')
+try:
+    model = joblib.load('GBR_model.pkl')
+    st.write("✅ Model Loaded Successfully!")
+except Exception as e:
+    model = None
+    st.error(f"❌ Model Loading Error: {e}")
 
 # Load dataset for extracting categorical options
-data = pd.read_csv("ResaleflatpricesbasedonregistrationdatefromJan2017onwards.csv")
+try:
+    data = pd.read_csv("ResaleflatpricesbasedonregistrationdatefromJan2017onwards.csv")
+    town_options = list(data['town'].unique())  # Convert to list
+    flat_model_options = list(data['flat_model'].unique())
+except Exception as e:
+    st.error(f"❌ Dataset Loading Error: {e}")
+    town_options, flat_model_options = [], []  # Set empty list if loading fails
 
-# Extract unique categories from the dataset
-town_options = list(data['town'].unique())  # Convert to list to avoid issues
-flat_type_options = list(data['flat_type'].unique())
-storey_range_options = list(data['storey_range'].unique())
-flat_model_options = list(data['flat_model'].unique())
-
-# Define the trained feature names to match model input
+# Define the trained feature names (ensure alignment with training data)
 trained_columns = [
     'floor Area (sqm)', 'House Age (Years)', 'Year of Sale', 'Block Number (Numeric)',
     'Flat Model (Encoded)', 'Town (Encoded)', 'Flat Type 2 Room', 'Flat Type 3 Room',
@@ -139,7 +144,7 @@ trained_columns = [
 ]
 
 # Streamlit App Configurations
-st.set_page_config(page_title="House Resale Price Prediction", layout="wide")
+st.set_page_config(page_title="🏡 House Resale Price Prediction", layout="wide")
 st.title("🏡 House Resale Price Prediction")
 st.markdown("This app predicts the **resale price of a house** based on various input features. Fill in the form below and click **Predict**!")
 
@@ -161,8 +166,8 @@ with col2:
 
 # Column 3 inputs
 with col3:
-    flat_model_encoded = st.selectbox("Select Flat Model", flat_model_options)
-    town_encoded = st.selectbox("Select Town", town_options)
+    flat_model_encoded = st.selectbox("Select Flat Model", flat_model_options) if flat_model_options else st.text("No data")
+    town_encoded = st.selectbox("Select Town", town_options) if town_options else st.text("No data")
 
 # One-hot encoded flat types
 flat_type_2_room = st.radio("Is it a 2 ROOM?", [0, 1], index=0)
@@ -180,49 +185,59 @@ storey_range_binned_high = st.radio("Is the storey range High?", [0, 1], index=0
 # Predict Button
 if st.button("Predict"):
     try:
-        # Convert categorical values to their corresponding indices
-        flat_model_encoded = flat_model_options.index(flat_model_encoded)
-        town_encoded = town_options.index(town_encoded)
+        # Ensure model is loaded
+        if model is None:
+            st.error("❌ Model not loaded correctly. Check the model file.")
+        else:
+            # Convert categorical values to their corresponding indices
+            if flat_model_encoded in flat_model_options:
+                flat_model_encoded = flat_model_options.index(flat_model_encoded)
+            else:
+                st.error("❌ Invalid Flat Model selected!")
+                flat_model_encoded = 0
 
-        # Collect features based on user input
-        features = [[
-            floor_area_sqm,
-            house_age,
-            year,
-            block_numeric,
-            flat_model_encoded,
-            town_encoded,
-            flat_type_2_room,
-            flat_type_3_room,
-            flat_type_4_room,
-            flat_type_5_room,
-            flat_type_executive,
-            flat_type_multi_generation,
-            storey_range_binned_low,
-            storey_range_binned_medium,
-            storey_range_binned_high
-        ]]
+            if town_encoded in town_options:
+                town_encoded = town_options.index(town_encoded)
+            else:
+                st.error("❌ Invalid Town selected!")
+                town_encoded = 0
 
-        # Convert to DataFrame and ensure column alignment
-        aligned_user_input = pd.DataFrame(features, columns=trained_columns)
+            # Collect features into an array
+            features = [[
+                floor_area_sqm,
+                house_age,
+                year,
+                block_numeric,
+                flat_model_encoded,
+                town_encoded,
+                flat_type_2_room,
+                flat_type_3_room,
+                flat_type_4_room,
+                flat_type_5_room,
+                flat_type_executive,
+                flat_type_multi_generation,
+                storey_range_binned_low,
+                storey_range_binned_medium,
+                storey_range_binned_high
+            ]]
 
-        # Ensure input format matches model expectations
-        user_input_array = np.array(aligned_user_input).reshape(1, -1)  # Ensure it's 2D
+            # Convert to DataFrame and ensure correct input format
+            aligned_user_input = pd.DataFrame(features, columns=trained_columns)
+            user_input_array = np.array(aligned_user_input, dtype=float).reshape(1, -1)
 
-        # Debugging Output
-        st.write("Input to Model:", user_input_array)
-        st.write("Shape of Input:", user_input_array.shape)
+            # Debugging Output
+            st.write("✅ Final Input Array:", user_input_array)
+            st.write("📏 Shape of Input:", user_input_array.shape)
 
-        # Make prediction
-        prediction_log = model.predict(user_input_array)
+            # Make prediction
+            prediction_log = model.predict(user_input_array)  # ✅ Ensure this works!
 
-        # Convert log prediction to actual price if model output is in log scale
-        prediction_actual = np.exp(prediction_log)
+            # Convert log prediction to actual price
+            prediction_actual = np.exp(prediction_log)
 
-        # Display prediction
-        st.success(f"📈 Predicted Log Resale Price: **${prediction_log[0]:,.2f}**")
-        st.success(f"💰 Predicted Resale Price: **${prediction_actual[0]:,.2f}**")
+            # Display result
+            st.success(f"📈 Predicted Log Resale Price: **${prediction_log[0]:,.2f}**")
+            st.success(f"💰 Predicted Resale Price: **${prediction_actual[0]:,.2f}**")
 
     except Exception as e:
         st.error(f"⚠️ Error: {e}")
-
