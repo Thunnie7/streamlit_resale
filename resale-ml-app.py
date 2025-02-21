@@ -116,7 +116,10 @@ if st.button("Predict"):
             ]]
 
             # Convert to DataFrame and ensure correct input format
-            aligned_user_input = pd.DataFrame(features, columns=X.columns)  # ✅ Use the same columns as training data
+            
+# ✅ Create DataFrame using the correct feature names
+            aligned_user_input = pd.DataFrame(features, columns=feature_columns)
+
 
             # Ensure all columns match (Debugging)
             st.write("✅ Expected Columns:", X.columns.tolist())
