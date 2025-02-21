@@ -118,6 +118,8 @@ import joblib
 import pandas as pd
 import numpy as np
 
+st.set_page_config(page_title="🏡 House Resale Price Prediction", layout="wide")
+
 # Load the pre-trained Gradient Boosting Regressor model
 try:
     model = joblib.load('GBR_model.pkl')
@@ -144,7 +146,7 @@ trained_columns = [
 ]
 
 # Streamlit App Configurations
-st.set_page_config(page_title="🏡 House Resale Price Prediction", layout="wide")
+
 st.title("🏡 House Resale Price Prediction")
 st.markdown("This app predicts the **resale price of a house** based on various input features. Fill in the form below and click **Predict**!")
 
