@@ -118,7 +118,7 @@ if st.button("Predict"):
             # Convert to DataFrame and ensure correct input format
             
 # ✅ Create DataFrame using the correct feature names
-            aligned_user_input = pd.DataFrame(features, columns=feature_columns)
+            aligned_user_input = pd.DataFrame(features, columns=features)
 
 
             # Ensure all columns match (Debugging)
