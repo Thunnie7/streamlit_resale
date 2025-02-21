@@ -65,15 +65,25 @@ if st.button("Predict"):
             town_encoded = town_options.index(town_encoded) if town_encoded in town_options else 0
 
             # Collect features into an array
+            # Define feature column names (EXCLUDE 'resale_price' since it's not used in training)
+            feature_columns = [
+                "floor_area_sqm", "house_age", "year", "block_numeric", "flat_model_encoded", "town_encoded",
+                "flat_type_2_room", "flat_type_3_room", "flat_type_4_room", "flat_type_5_room",
+                "flat_type_executive", "flat_type_multi_generation", "storey_range_binned_low",
+                "storey_range_binned_medium", "storey_range_binned_high"
+            ]
+            
+            # Ensure collected features match training data
             features = [[
                 floor_area_sqm, house_age, year, block_numeric, flat_model_encoded, town_encoded,
                 flat_type_2_room, flat_type_3_room, flat_type_4_room, flat_type_5_room,
                 flat_type_executive, flat_type_multi_generation, storey_range_binned_low,
                 storey_range_binned_medium, storey_range_binned_high
             ]]
-
-            # ✅ Create DataFrame using the correct feature names
+            
+            # ✅ Create DataFrame using the correct feature names (without 'resale_price')
             aligned_user_input = pd.DataFrame(features, columns=feature_columns)
+
 
             # Debug: Ensure feature alignment
             st.write("✅ Model Expected Columns:", feature_columns)
